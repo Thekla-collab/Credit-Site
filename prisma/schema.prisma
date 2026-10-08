@@ -1,0 +1,47 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+generator client {
+  provider = "prisma-client-js"
+}
+model Student {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  pin       String
+  approvals Approval[]
+}
+model ClassAccount {
+  id      Int @id @default(1)
+  balance Int @default(350)
+}
+model Transaction {
+  id        String   @id @default(uuid())
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+}
+model ShopItem {
+  id               String            @id @default(uuid())
+  title            String
+  price            Int
+  icon             String
+  purchaseRequests PurchaseRequest[]
+}
+model PurchaseRequest {
+  id        String     @id @default(uuid())
+  itemId    String
+  item      ShopItem   @relation(fields: [itemId], references: [id])
+  status    String     @default("OFFEN")
+  createdAt DateTime   @default(now())
+  approvals Approval[]
+}
+model Approval {
+  id                String          @id @default(uuid())
+  studentId         String
+  student           Student         @relation(fields: [studentId], references: [id])
+  purchaseRequestId String
+  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
+  @@unique([studentId, purchaseRequestId])
+}
